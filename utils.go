@@ -11,12 +11,13 @@ import (
 func Poll(period time.Duration, predicate func() bool) <-chan struct{} {
 	ch := make(chan struct{})
 	go func() {
-		for {
+		ticker := time.NewTicker(period)
+		defer ticker.Stop()
+		for range ticker.C {
 			if predicate() {
 				ch <- struct{}{}
 				return
 			}
-			time.Sleep(period)
 		}
 	}()
 	return ch

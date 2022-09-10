@@ -8,7 +8,7 @@ import (
 
 func TestPoll(t *testing.T) {
 	var i int
-	<-Poll(0, func() bool {
+	<-Poll(1*time.Nanosecond, func() bool {
 		i++
 		return i >= 3
 	})
