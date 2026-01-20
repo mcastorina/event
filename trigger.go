@@ -36,9 +36,6 @@ func (t *Trigger) Done() <-chan struct{} {
 // ensureInit is a helper method to ensure the internal sync.Cond is
 // initialized.
 func (t *Trigger) ensureInit() {
-	if t.ctx != nil {
-		return
-	}
 	t.initLock.Lock()
 	defer t.initLock.Unlock()
 	if t.ctx != nil {
