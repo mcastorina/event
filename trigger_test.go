@@ -2,6 +2,7 @@ package event
 
 import (
 	"sync"
+	"sync/atomic"
 	"testing"
 	"time"
 )
@@ -10,15 +11,15 @@ func TestTrigger(t *testing.T) {
 	var tr Trigger
 	var wg sync.WaitGroup
 
-	ready := make([]bool, 4)
-	done := make([]bool, 4)
+	ready := make([]atomic.Bool, 4)
+	done := make([]atomic.Bool, 4)
 	for i := 0; i < 4; i++ {
 		wg.Add(1)
 		go func(i int) {
 			defer wg.Done()
-			ready[i] = true
+			ready[i].Store(true)
 			tr.Wait()
-			done[i] = true
+			done[i].Store(true)
 		}(i)
 	}
 
@@ -40,16 +41,16 @@ func TestTrigger(t *testing.T) {
 	}
 }
 
-func all(arr []bool, expected bool) bool {
-	for _, b := range arr {
-		if b != expected {
+func all(arr []atomic.Bool, expected bool) bool {
+	for i := range arr {
+		if arr[i].Load() != expected {
 			return false
 		}
 	}
 	return true
 }
 
-func waitAllTrue(arr []bool) <-chan struct{} {
+func waitAllTrue(arr []atomic.Bool) <-chan struct{} {
 	ch := make(chan struct{})
 	go func() {
 		for !all(arr, true) {
